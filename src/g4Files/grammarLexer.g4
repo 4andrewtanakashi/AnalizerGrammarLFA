@@ -2,10 +2,15 @@ lexer grammar grammarLexer;
 
 ARROW: '→';
 LAMBDA: 'λ';
-VERTBAR: '|';
-WORDORDIG: (LOWW | DIGITS)+;
+PIPE: '|';
+WORDORDIG: (LOWW|DIGITS|SYMBOLS)+;
 LOWW: 'a'..'z';
 UPPW: 'A'..'Z';
-DIGITS: [0-9] ([0-9_]* [0-9])?;
+DIGITS: [0-9];
+SYMBOLS: '!' | '@' | '#' | '$' | '%' |
+'^' | '&' | '*' | '(' | ')' | '_' |
+'+' | '=' | '{' | '}' | '[' | ']' |
+':' | ';' | ',' | '.' | '?' | '~';
 
-WS: [ \t\r\n\u000C]+ -> channel(HIDDEN);
+NEWLINE : [\r\n] ;
+WS: [ \t]+ -> skip;

@@ -29,24 +29,44 @@ function verificationSemantic(txt) {
             }
         }
 
+		const symbols = ['!', '@', '#', '$', '%',
+		'^', '&', '*', '(', ')', '_',
+		'+', '=', '{', '}', '[', ']',
+		':', ';', ',', '.', '?', '~'];
         let variablesTemp = [];
         let popped;
         for (let r of rules) {
             tmp = r.split("→");
-            variablesTemp.push(tmp[0].trim());
+			console.log("tmp[0].trim()");
+			console.log(tmp[0].trim().split('').filter( letters => {
+				return (letters.toUpperCase() === letters);
+			})[0] );
+		    variablesTemp.push(tmp[0].trim().split('').filter( letters => {
+				return (letters.toUpperCase() === letters);
+			})[0]);
         }
+		console.log('\n');
         variablesTemp.reverse();
         popped = variablesTemp.pop();
 
-        //Lista de regra da direita do S -> A 
+        //Lista de regra da direita do S -> A
         let listRule = [];
         let leftSide = variablesTemp;
         leftSide.push(popped);
-        let eqif = 1;
+        let eqif = true;
         for (let v of rightSide) {
             for (let l of v) {
 
-                if (l.toUpperCase() === l && !leftSide.includes(l) &&!(/[0-9]/.test(l))) {
+
+                if ( !(/[0-9]/.test(l)) &&
+					(symbols.every(sym => sym !== l)) &&
+					(l.toUpperCase() === l) &&
+					 !leftSide.includes(l) ) {
+					console.log("toUpperCase");
+					console.log(symbols);
+					console.log();
+					console.log( !(symbols === l) );
+					console.log(l.toUpperCase());
                     listRule.push(l);
                     eqif = false;
                 }
@@ -61,15 +81,8 @@ function verificationSemantic(txt) {
                 return 0;
             } );
 
-            console.log("\n\nsubtractionElem");
-            console.log(listRule);
-
             let letter = subtractionElem.toString();
-            // if (this.state.lang === "pt")
-            //     this.setState({menssage: `Sua gramática não está definido ${subtractionElem.toString()}
-            //     como regra da esquerda.`});
-            // else this.setState({menssage: `Your grammar not definided ${subtractionElem.toString()}
-            //     in left rule`});
+
             return [false, letter];
         }
 
@@ -81,10 +94,7 @@ grammarParserListener.prototype.constructor = grammarParserListener;
 
 // Enter a parse tree produced by grammarParser#compilationUnit.
 grammarParserListener.prototype.enterCompilationUnit = function(ctx) {
-    console.log("CTX enterCompilationUnit");
-    console.log(ctx.toString());
-    console.log(ctx.toStringTree());
-    console.log("\n\n");
+
 };
 
 // Exit a parse tree produced by grammarParser#compilationUnit.
@@ -94,6 +104,7 @@ grammarParserListener.prototype.exitCompilationUnit = function(ctx) {
 
 // Enter a parse tree produced by grammarParser#initialSetence.
 grammarParserListener.prototype.enterInitialSetence = function(ctx) {
+
 };
 
 // Exit a parse tree produced by grammarParser#initialSetence.

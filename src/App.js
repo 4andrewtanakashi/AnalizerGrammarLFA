@@ -14,95 +14,81 @@ function App() {
     const grammarParserListener = require('./g4Files/grammarParserListener').grammarParserListener;
     const ErrorListener = require('./g4Files/ErrorListener');
 
-    function onChange (value) {
+    function onChange (grammarText) {
 
 
 
-        let tempGrammar = value;
-        let len = value.length;
-        let wordTest = value[len-2] + value[len-1];
+        let tempGrammar = grammarText;
+        let len = grammarText.length;
+        let wordTest = grammarText[len-2] + grammarText[len-1];
 
-        let wordTesLambda = value.split(".");
+        let wordTesLambda = grammarText.split(".");
 
         // Condição que verifica se houve split, se houve é porque existe ponto.
         if ( wordTesLambda.length > 1) {
             wordTesLambda[0] = wordTesLambda[0] + "λ" + wordTesLambda[1];
             tempGrammar = wordTesLambda[0];
         }else if (wordTest === "->"){
-            let tmp = value.split("->");
+            let tmp = grammarText.split("->");
             tmp[0] += "→";
             tempGrammar = tmp[0];
         }else {
-            tempGrammar = value;
+            tempGrammar = grammarText;
         }
 
-        
+
         setValueStr(tempGrammar);
 
-        let input = tempGrammar;
-        let chars = new antlr4.InputStream(input);
-        let lexer = new grammarLexer(chars);
-        lexer.strictMode = false;
-        let tokens  = new antlr4.CommonTokenStream(lexer);
-        let parser = new grammarParser(tokens);
+        //Instanciando métodos do ANTLR4
+       let input = grammarText;
+       let chars = new antlr4.InputStream(input);
+       let lexer = new grammarLexer(chars);
+       lexer.strictMode = false;
+       let tokens  = new antlr4.CommonTokenStream(lexer);
+       let parser = new grammarParser(tokens);
+
+
+       //Instânciando o Parser para custom métodos.
+       parser.buildParseTrees = true;
+       let errorListerner = new ErrorListener();
+       let sematicError = new grammarParserListener(grammarText).semanaticError;
+       parser.addParseListener(new grammarParserListener(grammarText));
+       parser.removeErrorListeners(); // Remove default ConsoleErrorListener
+       parser.addErrorListener(errorListerner); // Add custom error listener
+
+       try {
+           let tree = parser.compilationUnit();
+           console.log(tree.toStringTree(parser.ruleNames));
+
+           setMessageError("");
+           setColor("green");
+           setShowError("none");
+       } catch (e) {
+           setMessageError(e);
+           setColor("red");
+           setShowError("block");
+       }
+       finally {
+
+           if (!sematicError[0]) {
+               setMessageError( `Sua gramática não está definido ${sematicError[1]}
+               como regra da esquerda.`);
+
+
+               setColor("red");
+               setShowError("block");
+           }
+       }
 
 
 
-        parser.buildParseTrees = true;
-
-        let errorListerner = new ErrorListener();
-
-        let sematicError = new grammarParserListener(tempGrammar).semanaticError;
-
-        parser.addParseListener(new grammarParserListener(tempGrammar));
-        parser.removeErrorListeners(); // Remove default ConsoleErrorListener
-        parser.addErrorListener(errorListerner); // Add custom error listener
-
-        let tempMessageError;
-
-        try {
-            let tree = parser.compilationUnit();
-
-            console.log(parser._syntaxErrors);
-            console.log(tree.toStringTree(parser.ruleNames));
-            console.log();
-
-            setMessageError("");
-            setColor("green");
-            setShowError("none");
-            tempMessageError = "";
-        } catch (e) {
-            console.log("ENTROU ERROR catch")
-            setMessageError(e);
-            tempMessageError = (tempGrammar === "")? "" : e;
-            console.log(e);
-        } 
-        finally {
-            if (tempMessageError !== "") {
-
-                setColor("red");
-                setShowError("block");
-            } else if (tempGrammar === "") {
-
-                setColor("red");
-                setShowError("none");
-            }
-
-            if (!sematicError[0]) {
-                setColor("red");
-                setShowError("block");
-                setMessageError("Your grammar not definided " + sematicError[1]);
-            }
-        }
-
-        
     }
 
 
 
     return (
         <div className="App">
-            <div style={{ "background-color": "red", 
+            <div style={{ "background-color": "red",
                         "color":"black",
                         "display": showError}}>
                 {messageError}
@@ -122,4 +108,3 @@ function App() {
 }
 
 export default App;
- 

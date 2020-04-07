@@ -2,18 +2,18 @@ parser grammar grammarParser;
 
 options { tokenVocab=grammarLexer; }
 
-compilationUnit: initialSetence EOF ;
+compilationUnit: initialSetence+ EOF ;
 
-initialSetence: UPPW+ ARROW setenses+ ;
+initialSetence: wordComplex+ ARROW setenses NEWLINE?;
 
 setenses: WORDORDIG+ moreSetences*
             | LAMBDA moreSetences*
             | UPPW+ moreSetences*
-            | wordComplex+ moreSetences*
+            | wordComplex moreSetences*
             ;
 
-wordComplex: (UPPW+ | WORDORDIG+)+ ;
+wordComplex: (UPPW|WORDORDIG|SYMBOLS)+ ;
 
-moreSetences: VERTBAR setenses initialSetence?
+moreSetences: PIPE setenses initialSetence?
                 | initialSetence
                 ;
